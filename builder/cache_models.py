@@ -2,7 +2,7 @@
 
 import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, AutoencoderKL
-
+import requests
 
 def fetch_pretrained_model(model_class, model_name, **kwargs):
     '''
@@ -19,6 +19,27 @@ def fetch_pretrained_model(model_class, model_name, **kwargs):
             else:
                 raise
 
+def get_diffusion_pipelines():
+    '''
+    Fetches the Stable Diffusion XL pipelines from the HuggingFace model hub.
+    '''
+    common_args = {
+        "torch_dtype": torch.float16,
+        "variant": "fp16",
+        "use_safetensors": True
+    }
+    
+    pipe = fetch_pretrained_model(StableDiffusionXLPipeline,
+                                  "stabilityai/stable-diffusion-xl-base-1.0", **common_args)
+    vae = fetch_pretrained_model(
+        AutoencoderKL, "madebyollin/sdxl-vae-fp16-fix", **{"torch_dtype": torch.float16}
+    )
+    print("Loaded VAE")
+    refiner = fetch_pretrained_model(StableDiffusionXLImg2ImgPipeline,
+                                     "stabilityai/stable-diffusion-xl-refiner-1.0", **common_args)
+
+    return pipe, refiner, vae
+
 
 def get_diffusion_pipelines():
     '''
@@ -29,7 +50,7 @@ def get_diffusion_pipelines():
         "variant": "fp16",
         "use_safetensors": True
     }
-
+    
     pipe = fetch_pretrained_model(StableDiffusionXLPipeline,
                                   "stabilityai/stable-diffusion-xl-base-1.0", **common_args)
     vae = fetch_pretrained_model(
