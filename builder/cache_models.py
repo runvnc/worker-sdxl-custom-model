@@ -1,6 +1,6 @@
 # builder/model_fetcher.py
 
-import os
+import argparse
 import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, AutoencoderKL
 import requests
@@ -20,15 +20,12 @@ def fetch_pretrained_model(model_class, model_name, **kwargs):
             else:
                 raise
 
-def download_model_from_civitai():
+def download_model_from_civitai(civitai_key, model_id):
     '''
     Downloads a model from Civitai using the provided environment variables.
     '''
-    civitai_key = os.getenv("CIVITAI_KEY")
-    model_id = os.getenv("CIVITAI_MODEL_ID")
-
-    if not civitai_key or not model_id or not model_name:
-        raise ValueError("CIVITAI_KEY, CIVITAI_MODEL_ID must be set in the environment.")
+    if not civitai_key or not model_id:
+        raise ValueError("CIVITAI_KEY and CIVITAI_MODEL_ID must be provided.")
 
     url = f"https://civitai.com/api/download/models/{model_id}?token={civitai_key}"
     response = requests.get(url, stream=True)
@@ -55,5 +52,10 @@ def download_vae():
 
 
 if __name__ == "__main__":
-    download_model_from_civitai()
+    parser = argparse.ArgumentParser(description='Download models from Civitai.')
+    parser.add_argument('--civitai_key', required=True, help='Civitai API key')
+    parser.add_argument('--model_id', required=True, help='Civitai model ID')
+    args = parser.parse_args()
+
+    download_model_from_civitai(args.civitai_key, args.model_id)
     download_vae()
