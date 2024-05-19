@@ -28,7 +28,7 @@ def download_model_from_civitai():
     model_id = os.getenv("CIVITAI_MODEL_ID")
 
     if not civitai_key or not model_id or not model_name:
-        raise ValueError("CIVITAI_KEY, CIVITAI_MODEL_ID, and CIVITAI_MODEL_NAME must be set in the environment.")
+        raise ValueError("CIVITAI_KEY, CIVITAI_MODEL_ID must be set in the environment.")
 
     url = f"https://civitai.com/api/download/models/{model_id}?token={civitai_key}"
     response = requests.get(url, stream=True)
