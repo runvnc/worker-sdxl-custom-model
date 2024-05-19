@@ -36,10 +36,10 @@ class ModelHandler:
         self.load_models()
 
     def load_base(self):
-        vae = AutoencoderKL.from_single_file(
-            f"models/model.safetensors", torch_dtype=torch.float16)
-        base_pipe = StableDiffusionXLPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-base-1.0", vae=vae,
+        vae = AutoencoderKL.from_pretrained(
+            "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
+        base_pipe = StableDiffusionXLPipeline.from_single_file(
+            "models/model.safetensors", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
         )
         base_pipe = base_pipe.to("cuda", silence_dtype_warnings=True)
@@ -49,6 +49,7 @@ class ModelHandler:
     def load_models(self):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_base = executor.submit(self.load_base)
+
             self.base = future_base.result()
 
 
