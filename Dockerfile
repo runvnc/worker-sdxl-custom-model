@@ -1,6 +1,9 @@
 # Base image
 FROM runpod/base:0.4.2-cuda11.8.0
 
+ARG CIVITAI_MODEL_ID
+ARG CIVITAI_KEY
+
 ENV HF_HUB_ENABLE_HF_TRANSFER=0
 
 # Install Python dependencies (Worker Template)
@@ -11,7 +14,8 @@ RUN python3.11 -m pip install --upgrade pip && \
 
 # Cache Models
 COPY builder/cache_models.py /cache_models.py
-RUN python3.11 /cache_models.py && \
+RUN mkdir models
+RUN python3.11 /cache_models.py --civitai_key $CIVITAI_KEY --model_id $CIVITAI_MODEL_ID && \
     rm /cache_models.py
 
 # Add src files (Worker Template)

@@ -30,10 +30,14 @@ def download_model_from_civitai(civitai_key, model_id):
     url = f"https://civitai.com/api/download/models/{model_id}?token={civitai_key}"
     response = requests.get(url, stream=True)
 
+    sz = 64000
+    total = 0
     if response.status_code == 200:
         with open(f"models/model.safetensors", "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
+            for chunk in response.iter_content(chunk_size=sz):
                 f.write(chunk)
+                total += sz
+                print(round(total / 1000000), "MiB")
         print(f"Model {model_name} downloaded successfully.")
     else:
         raise Exception(f"Failed to download model: {response.status_code} - {response.text}")
@@ -56,6 +60,6 @@ if __name__ == "__main__":
     parser.add_argument('--civitai_key', required=True, help='Civitai API key')
     parser.add_argument('--model_id', required=True, help='Civitai model ID')
     args = parser.parse_args()
-
-    download_model_from_civitai(args.civitai_key, args.model_id)
+    #download manually, will add from models/
+    #download_model_from_civitai(args.civitai_key, args.model_id)
     download_vae()
