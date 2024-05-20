@@ -5,6 +5,7 @@ Contains the handler function that will be called by the serverless.
 import os
 import base64
 import concurrent.futures
+from torchvision import transforms
 
 import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, AutoencoderKL
@@ -62,6 +63,9 @@ def _save_and_upload_images(images, job_id):
     os.makedirs(f"/{job_id}", exist_ok=True)
     image_urls = []
     for index, image in enumerate(images):
+        # Convert tensor to PIL Image if it's not already an image
+        if not isinstance(image, Image.Image):
+            image = transforms.ToPILImage()(image.squeeze(0))
         image_path = os.path.join(f"/{job_id}", f"{index}.png")
         image.save(image_path)
 
