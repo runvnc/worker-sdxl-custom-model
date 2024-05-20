@@ -64,14 +64,20 @@ def _save_and_upload_images(images, job_id):
     os.makedirs(f"/{job_id}", exist_ok=True)
     image_urls = []
     for index, image in enumerate(images):
-        print('outputting image..')
-        image = transforms.ToPILImage()(image.squeeze(0)).convert("RGB")
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        image_urls.append(f"data:image/png;base64,{image_data}")
+        image_path = os.path.join(f"/{job_id}", f"{index}.png")
+        image.save(image_path)
+
+        if os.environ.get('BUCKET_ENDPOINT_URL', False):
+            image_url = rp_upload.upload_image(job_id, image_path)
+            image_urls.append(image_url)
+        else:
+            with open(image_path, "rb") as image_file:
+                image_data = base64.b64encode(
+                    image_file.read()).decode("utf-8")
+                image_urls.append(f"data:image/png;base64,{image_data}")
 
     rp_cleanup.clean([f"/{job_id}"])
+
     return image_urls
 
 
@@ -128,7 +134,7 @@ def generate_image(job):
             num_inference_steps=job_input['num_inference_steps'],
             guidance_scale=job_input['guidance_scale'],
             denoising_end=job_input['high_noise_frac'],
-            output_type="latent",
+            #output_type="latent",
             num_images_per_prompt=job_input['num_images'],
             generator=generator
         ).images
