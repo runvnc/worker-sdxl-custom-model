@@ -3,6 +3,7 @@ Contains the handler function that will be called by the serverless.
 '''
 
 import os
+import io
 import base64
 import concurrent.futures
 from torchvision import transforms
@@ -64,9 +65,10 @@ def _save_and_upload_images(images, job_id):
     image_urls = []
     for index, image in enumerate(images):
         print('outputting image..')
-        image = transforms.ToPILImage()(image.squeeze(0)
-        # convert image to PNG and base64 encode as data url 
-        image_data = 
+        image = transforms.ToPILImage()(image.squeeze(0)).convert("RGB")
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
         image_urls.append(f"data:image/png;base64,{image_data}")
 
     rp_cleanup.clean([f"/{job_id}"])
