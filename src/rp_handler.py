@@ -63,20 +63,11 @@ def _save_and_upload_images(images, job_id):
     os.makedirs(f"/{job_id}", exist_ok=True)
     image_urls = []
     for index, image in enumerate(images):
-        # Convert tensor to PIL Image if it's not already an image
-        if not isinstance(image, Image.Image):
-            image = transforms.ToPILImage()(image.squeeze(0))
-        image_path = os.path.join(f"/{job_id}", f"{index}.png")
-        image.save(image_path)
-
-        if os.environ.get('BUCKET_ENDPOINT_URL', False):
-            image_url = rp_upload.upload_image(job_id, image_path)
-            image_urls.append(image_url)
-        else:
-            with open(image_path, "rb") as image_file:
-                image_data = base64.b64encode(
-                    image_file.read()).decode("utf-8")
-                image_urls.append(f"data:image/png;base64,{image_data}")
+        print('outputting image..')
+        image = transforms.ToPILImage()(image.squeeze(0)
+        # convert image to PNG and base64 encode as data url 
+        image_data = 
+        image_urls.append(f"data:image/png;base64,{image_data}")
 
     rp_cleanup.clean([f"/{job_id}"])
     return image_urls
