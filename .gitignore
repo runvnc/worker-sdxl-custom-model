@@ -163,3 +163,5 @@ runpod.toml
 
 models/*
 *.png
+image.png
+
