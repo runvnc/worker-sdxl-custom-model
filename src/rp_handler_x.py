@@ -43,9 +43,11 @@ class ModelHandler:
         print("loading base")
         vae = AutoencoderKL.from_pretrained(
             "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
+        print(dir(DiffusionPipeline))        
+        def load_base_model(pipeline, model_dir, base_model, device):
  
-        base_pipe = StableDiffusionXLPipeline.from_single_file(
-            "models/model.safetensors"
+        base_pipe = DiffusionPipeline.from_pretrained(
+            "/dev/shm/models/model.safetensors"
             , torch_dtype       = torch.float16
             , use_safetensors   = True
             , variant           = "fp16"
@@ -155,20 +157,11 @@ def generate_image(job):
 
     generator = torch.Generator("cuda").manual_seed(job_input['seed'])
 
-    MODELS.base.scheduler = make_scheduler(job_input['scheduler'], MODELS.base.scheduler.config)
-    pipeline = MODELS.base
-    compel = Compel(tokenizer=[pipeline.tokenizer, pipeline.tokenizer_2] , text_encoder=[pipeline.text_encoder, pipeline.text_encoder_2], returned_embeddings_type=ReturnedEmbeddingsType.PENULTIMATE_HIDDEN_STATES_NON_NORMALIZED, truncate_long_prompts=False, requires_pooled=[False, True])
-    conditioning = compel.build_conditioning_tensor(job_input['prompt']))
-    negative_conditioning = compel.build_conditioning_tensor(job_input['negative_prompt'])
-    [conditioning, negative_conditioning] = compel.pad_conditioning_tensors_to_same_length([conditioning, negative_conditioning])
-    
-    image = pipeline(prompt_embeds=conditioning, pooled_prompt_embeds=pooled,
-                     negative_prompt_embeds=negative_conditioning, 
-                     pooled_negative_prompt_embeds=num_inference_steps=30).images[0]
+    MODELS.base.scheduler = make_scheduler(
+    job_input['scheduler'], MODELS.base.scheduler.config)
 
     output = MODELS.base.txt2img(
-        prompt_embeds=conditioning,
-        pooled_prompt_embeds=pooled,
+        prompt= job_input['prompt'],
         negative_prompt=job_input['negative_prompt'],
         height=job_input['height'],
         width=job_input['width'],

@@ -41,7 +41,7 @@ class ModelHandler:
         vae = AutoencoderKL.from_pretrained(
             "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
         base_pipe = StableDiffusionXLPipeline.from_single_file(
-            "models/model.safetensors", vae=vae,
+            "Niggendar/ponyRealism_v10", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
         )
         base_pipe = base_pipe.to("cuda", silence_dtype_warnings=True)
@@ -149,7 +149,6 @@ def generate_image(job):
 
     MODELS.base.scheduler = make_scheduler(
         job_input['scheduler'], MODELS.base.scheduler.config)
-
 
 
     if starting_image:  # If image_url is provided, run only the refiner pipeline
