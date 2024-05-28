@@ -6,13 +6,11 @@ import os
 import io
 import base64
 import concurrent.futures
-import torch
-import torchvision
 from torchvision import transforms
 
+import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, AutoencoderKL
 from diffusers.utils import load_image
-from diffusers import DiffusionPipeline
 
 from diffusers import (
     PNDMScheduler,
@@ -40,17 +38,11 @@ class ModelHandler:
         self.load_models()
 
     def load_base(self):
-        print("loading base")
         vae = AutoencoderKL.from_pretrained(
             "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
-        
-        base_pipe = DiffusionPipeline.from_single_file(
-            "models/model.safetensors"
-            , torch_dtype       = torch.float16
-            , use_safetensors   = True
-            , variant           = "fp16"
-            , vae               = vae
-            , custom_pipeline   = "lpw_stable_diffusion_xl",
+        base_pipe = StableDiffusionXLPipeline.from_single_file(
+            "models/model.safetensors", vae=vae,
+            torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
         )
         base_pipe = base_pipe.to("cuda", silence_dtype_warnings=True)
         base_pipe.enable_xformers_memory_efficient_attention()
@@ -156,20 +148,43 @@ def generate_image(job):
     generator = torch.Generator("cuda").manual_seed(job_input['seed'])
 
     MODELS.base.scheduler = make_scheduler(
-    job_input['scheduler'], MODELS.base.scheduler.config)
+        job_input['scheduler'], MODELS.base.scheduler.config)
 
-    output = MODELS.base.txt2img(
-        prompt= job_input['prompt'],
-        negative_prompt=job_input['negative_prompt'],
-        height=job_input['height'],
-        width=job_input['width'],
-        max_embeddings_multiples=3,
-        num_inference_steps=job_input['num_inference_steps'],
-        guidance_scale=job_input['guidance_scale'],
-        denoising_end=job_input['high_noise_frac'],
-        #output_type="latent",
-        num_images_per_prompt=job_input['num_images'],
-        generator=generator
+
+
+    if starting_image:  # If image_url is provided, run only the refiner pipeline
+        init_image = load_image(starting_image).convert("RGB")
+        prompt_embeds, negative_prompt_embeds = get_pipeline_embeds(MODELS.refiner, job_input['prompt'], job_input['negative_prompt'], "cuda")
+
+        output = MODELS.refiner(
+            prompt_embeds=prompt_embeds,
+            num_inference_steps=job_input['refiner_inference_steps'],
+            strength=job_input['strength'],
+            image=init_image,
+            generator=generator
+        ).images
+    else:
+        (
+            prompt_embeds,
+            negative_prompt_embeds,
+            pooled_prompt_embeds,
+            negative_pooled_prompt_embeds,
+        ) = MODELS.base.encode_prompt(job_input['prompt'], "cuda", num_images_per_prompt=job_input['num_images'])
+        # Generate latent image using pipe
+
+        output = MODELS.base(
+            prompt_embeds=prompt_embeds,
+            pooled_prompt_embeds=pooled_prompt_embed,
+            negative_prompt_embeds=negative_prompt_embeds,
+            negative_pooled_prompt_embeds=negative_pooled_prompt_embeds,
+            height=job_input['height'],
+            width=job_input['width'],
+            num_inference_steps=job_input['num_inference_steps'],
+            guidance_scale=job_input['guidance_scale'],
+            denoising_end=job_input['high_noise_frac'],
+            #output_type="latent",
+            num_images_per_prompt=job_input['num_images'],
+            generator=generator
         ).images
 
     image_urls = _save_and_upload_images(output, job['id'])
