@@ -18,7 +18,7 @@ neg = sys.argv[4]
 
 if not os.path.exists(f"models/{modelname}.safetensors"):
     print(f"Model not found, downloading {modelurl} to {modelname}")
-    civit_download(model, f"models/{modelname}.safetensors")
+    civit_download(modelurl, f"models/{modelname}.safetensors")
 
 pipe = StableDiffusionXLPipeline(f"models/{modelname}.safetensors")
 
