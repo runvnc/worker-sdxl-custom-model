@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+G__pycache__/
 *.py[cod]
 *$py.class
 
@@ -162,3 +162,4 @@ runpod.toml
 .aider*
 
 models/*
+*.png
