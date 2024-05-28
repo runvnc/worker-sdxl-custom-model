@@ -23,6 +23,6 @@ if not os.path.exists(f"models/{modelname}.safetensors"):
 pipe = StableDiffusionXLPipeline(f"models/{modelname}.safetensors")
 
 for i in range(1, 5):
-    fname = gen(prompt, neg=neg, cfg_scale=8, steps=25)
+    fname = gen(prompt, neg=neg, cfg_scale=9, steps=25)
     print(fname)
 
