@@ -3,6 +3,7 @@ Contains the handler function that will be called by the serverless.
 '''
 
 import a1111
+import base64
 import os
 import runpod
 from runpod.serverless.utils import rp_upload, rp_cleanup
@@ -33,10 +34,10 @@ def generate_image(job):
         width=job_input['width'],
         steps=job_input['num_inference_steps'],
         cfg_scale=job_input['guidance_scale']
-        ).images
-
+        )
+    print(fname)
     image_urls = []
-    with open(image_path, "rb") as image_file:
+    with open(fname, "rb") as image_file:
         image_data = base64.b64encode(
             image_file.read()).decode("utf-8")
         image_urls.append(f"data:image/png;base64,{image_data}")
