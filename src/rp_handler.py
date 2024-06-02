@@ -12,25 +12,6 @@ from rp_schemas import INPUT_SCHEMA
 
 torch.cuda.empty_cache()
 
-# ---------------------------------- Helper ---------------------------------- #
-
-
-def _save_and_upload_images(images, job_id):
-    os.makedirs(f"/{job_id}", exist_ok=True)
-    image_urls = []
-    for index, image in enumerate(images):
-        image_path = os.path.join(f"/{job_id}", f"{index}.png")
-        image.save(image_path)
-
-       with open(image_path, "rb") as image_file:
-            image_data = base64.b64encode(
-                image_file.read()).decode("utf-8")
-            image_urls.append(f"data:image/png;base64,{image_data}")
-
-    rp_cleanup.clean([f"/{job_id}"])
-
-    return image_urls
-
 
 
 @torch.inference_mode()

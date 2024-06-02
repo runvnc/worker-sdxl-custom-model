@@ -1,1 +1,3 @@
+runpod
+rp_schemas
 auto1111sdk
