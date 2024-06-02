@@ -28,7 +28,7 @@ def generate_image(job):
 
     fname = a1111.gen(
         prompt=job_input['prompt'],
-        negative_prompt=job_input['negative_prompt'],
+        neg=job_input['negative_prompt'],
         height=job_input['height'],
         width=job_input['width'],
         steps=job_input['num_inference_steps'],
