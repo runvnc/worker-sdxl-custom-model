@@ -26,9 +26,6 @@ def generate_image(job):
     if job_input['seed'] is None:
         job_input['seed'] = int.from_bytes(os.urandom(2), "big")
 
-    pipeline = MODELS.base
-    fname = gen(prompt, neg=neg, cfg_scale=9, steps=25)
-    
     fname = a1111.gen(
         prompt=job_input['prompt'],
         negative_prompt=job_input['negative_prompt'],
