@@ -7,12 +7,9 @@ import os
 import runpod
 from runpod.serverless.utils import rp_upload, rp_cleanup
 from runpod.serverless.utils.rp_validator import validate
-import torch
 from rp_schemas import INPUT_SCHEMA
 
 
-
-@torch.inference_mode()
 def generate_image(job):
     '''
     Generate an image from text using your Model
