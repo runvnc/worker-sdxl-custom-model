@@ -1,15 +1,1 @@
-torchvision
-runpod
-hf_transfer
-omegaconf
-diffusers
-transformers
-accelerate
-safetensors
-scipy
-numpy
-PyWavelets
-opencv-python
-invisible-watermark
-xformers
-torch 
+auto1111sdk
