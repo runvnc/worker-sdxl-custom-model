@@ -3,6 +3,8 @@ import sys
 import uuid
 import os
 
+pipe = None
+
 def gen(prompt, neg='', width=768, height=1024, steps=10, cfg_scale=7.5):
     output = pipe.generate_txt2img(prompt = prompt, negative_prompt=neg, cfg_scale=cfg_scale, height = height, width = width, steps = steps)
 
@@ -11,7 +13,7 @@ def gen(prompt, neg='', width=768, height=1024, steps=10, cfg_scale=7.5):
     output[0].save(fname)
     return fname
 
-if __name__ == '__main__':
+if False and __name__ == '__main__':
     modelurl = sys.argv[1]
     modelname = sys.argv[2]
     prompt = sys.argv[3]
@@ -27,4 +29,7 @@ if __name__ == '__main__':
     for i in range(1, 5):
         fname = gen(prompt, neg=neg, cfg_scale=9, steps=25)
         print(fname)
+else:
+    pipe = StableDiffusionXLPipeline(f"models/model.safetensors")
+    pipe.set_vae("models/sdxl_vae.safetensors")
 
